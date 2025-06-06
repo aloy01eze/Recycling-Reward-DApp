@@ -1,40 +1,111 @@
-Recycling Reward DApp
-Overview
-The Recycling Reward DApp incentivizes recycling by issuing eco-tokens for verified recycling activities on the Stacks blockchain using Clarity smart contracts. Users can recycle items (verified via QR/NFC), earn eco-tokens, redeem them, or donate to eco-NGOs. The DApp includes fraud prevention, transparent reward algorithms, geo-fencing, and timestamp logging.
-Features
+# EcoChain - A Blockchain-Based Recycling Incentive DApp
 
-Recycle Items: Users submit item IDs with geo-location for verification, earning eco-tokens.
-Eco-Token Management: Redeem or donate tokens to eco-NGOs.
-Leaderboard: Displays top recyclers based on total recycled items.
-Security: Verifiable IDs, geo-fencing, and transparent algorithms prevent fraud.
-Optimization: Efficient reward calculation reduces gas costs.
-Testing: Comprehensive test suite ensures contract reliability.
+EcoChain is a decentralized application (DApp) built on the Stacks blockchain using the Clarity smart contract language. It incentivizes recycling by rewarding users with tokens when they properly dispose of recyclable items within a defined geo-fence.
 
-Installation
+## Features
 
-Install Clarinet: npm install -g @hirosystems/clarinet
-Clone the repository: git clone <repo-url>
-Navigate to the project directory: cd recycling-reward-dapp
-Start Clarinet: clarinet integrate
-Deploy the contract to a local Stacks blockchain for testing.
+* Track Recycled Items: Users can submit details of recycled items including geolocation.
+* Geo-Fencing: Ensures that recycling only counts when done in allowed areas.
+* Earn Tokens: Verified recycling actions reward users with `eco-token` fungible tokens.
+* Leaderboard: Tracks users by the number of items recycled.
+* Token Redemption: Users can redeem earned tokens.
+* Token Donations: Users can donate tokens to an NGO for community support.
 
-Usage
+## Constants
 
-Open index.html in a browser with a Stacks wallet (e.g., Hiro Wallet).
-Connect your wallet and interact with the DApp to recycle items, redeem tokens, or donate.
-View the leaderboard to see top recyclers.
+* `CONTRACT-OWNER`: The owner of the smart contract.
+* `eco-token`: Fungible token rewarded for recycling.
+* `eco-ngo`: Principal address of the beneficiary NGO.
+* Error constants:
 
-Testing
-Run the test suite with:
+  * `ERR-NOT-AUTHORIZED (u100)`
+  * `ERR-INVALID-ID (u101)`
+  * `ERR-GEO-FENCE (u102)`
+  * `ERR-ALREADY-VERIFIED (u103)`
+  * `ERR-INSUFFICIENT-BALANCE (u104)`
+
+## Data Structures
+
+### `recycled-items`
+
+Tracks each unique item recycled per user:
+
+```clarity
+{ item-id: string, user: principal } => { timestamp, latitude, longitude, verified }
+```
+
+### `user-balances`
+
+User address mapped to their `eco-token` balance.
+
+### `leaderboard`
+
+Tracks the total number of items recycled by each user.
+
+## Public Functions
+
+### `recycle-item`
+
+```clarity
+(recycle-item (item-id string) (latitude int) (longitude int)) : (response bool uint)
+```
+
+Submits a recycled item and rewards the user.
+
+### `redeem-tokens`
+
+```clarity
+(redeem-tokens (amount uint)) : (response bool uint)
+```
+
+Burns `eco-token` in exchange for off-chain rewards.
+
+### `donate-tokens`
+
+```clarity
+(donate-tokens (amount uint)) : (response bool uint)
+```
+
+Transfers `eco-token` to the `eco-ngo`.
+
+### `get-leaderboard`
+
+```clarity
+(get-leaderboard (user principal)) : { total-recycled: uint }
+```
+
+### `get-balance`
+
+```clarity
+(get-balance (user principal)) : uint
+```
+
+## Private Functions
+
+### `is-valid-geo-fence`
+
+Ensures submitted coordinates fall within a 0–1000 bounded box.
+
+### `update-leaderboard`
+
+Updates user's total recycled item count.
+
+## Requirements
+
+* Stacks Blockchain
+* Clarity Language Support (via Clarinet or Hiro Platform)
+
+## Testing
+
+Use [Clarinet](https://docs.stacks.co/docs/clarity/clarinet/overview/) to test the contract:
+
+```bash
 clarinet test
+```
 
-The test suite covers recycling, redeeming, donating, and geo-fence validation.
-Security Enhancements
+## Future Improvements
 
-Verifiable user IDs via tx-sender.
-Geo-fencing ensures recycling occurs within valid coordinates.
-Transparent reward algorithms with fixed token issuance.
-Post-conditions to verify token balances (implicit in Clarity).
+* Expand geo-fence to include real-world coordinates
+* Add NFT support for unique recycling badges
+* Implement governance to allow eco-ngo changes
 
-License
-MIT License
